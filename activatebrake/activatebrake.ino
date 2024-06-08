@@ -51,6 +51,16 @@ void return_brake(){
   OCR1B = ocrValue;
 }
 
+void update_pressure_flag(){
+  if(pressure_value == 0){
+    pressure_flag = 0;
+  }
+  else{
+    pressure_flag = 1;
+  }
+}
+
+
 void balancing(int angle){
   balancing_value = setServoPosition(angle);
   OCR1C = balancing_value;
