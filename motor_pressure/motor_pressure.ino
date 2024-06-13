@@ -1,3 +1,7 @@
+#define FOSC 16000000 // Clock Speed
+#define BAUD 9600
+#define MYUBRR FOSC/16/BAUD-1
+
 int ocrValue;
 int value;
 int16_t balancing_value;
@@ -46,6 +50,16 @@ void setup_servo_motor(){
   TCCR4A |= (1 << COM4C1);
 }
 
+int16_t USART_Receive_int16() {
+  while (!(UCSR1A & (1 << RXC1))); // 상위 바이트를 받을 때까지 대기
+  unsigned char high_byte = UDR1;
+    
+  while (!(UCSR1A & (1 << RXC1))); // 하위 바이트를 받을 때까지 대기
+  unsigned char low_byte = UDR1;
+
+  return (int16_t)((high_byte << 8) | low_byte); // 두 바이트를 합쳐 int16_t 값으로 반환
+}
+
 int setServoPosition(int angle){ 
   // 모터 입력값 설정
   int pulseWidth = 1500 + 10 * angle;
@@ -74,21 +88,24 @@ void return_brake(){
 
 void balancing(int16_t angle){ 
   //밸런싱 모터 작동 함수
-  balancing_value = setServoPosition(angle * -1);
+  balancing_value = setServoPosition(angle * 1);
   OCR4C = balancing_value;
 }
 
 void setup() { 
   // 시리얼 통신 시작
   Serial.begin(9600); 
+  USART_Init(MYUBRR);
   setup_servo_motor(); 
   init_ADC();
 }
 
 void loop() {
+  int16_t receivedValue = USART_Receive_int16();
   value = ADC;
+  Serial.println(value);
   if(value == 0){
-    brakingSystem(angle);
+    brakingSystem(receivedValue);
   }
   else {
     return_brake();
@@ -98,6 +115,11 @@ void loop() {
 
 void brakingSystem(int16_t slopeValue) { 
   //브레이크 작동
-  activateBrake_1();
-  activateBrake_2();
+  if(slopeValue != 0){
+    activateBrake_1();
+    activateBrake_2();
+  }
+  else { 
+    return_brake();
+  }
 }
