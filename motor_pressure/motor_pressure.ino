@@ -4,7 +4,8 @@ int16_t balancing_value;
 int angle;
 
 
-void init_ADC() {
+void init_ADC() { 
+  // 압력센서 ADC 활성화
   ADMUX |= (0 << REFS1) | (1 << REFS0);
   ADMUX |= (0 << ADLAR);
   ADMUX |= (0 << MUX3) | (0 << MUX2) | (0 << MUX1) | (0 << MUX0);
@@ -19,7 +20,7 @@ void init_ADC() {
 }
 
 void setup_servo_motor(){
-  // 디지털 6, 7, 8번 핀을 출력으로 설정 (Timer 4의 PWM 핀)
+  // 디지털 핀 출력으로 설정
   DDRH |= (1 << PH3); // OC4A
   DDRH |= (1 << PH4); // OC4B
   DDRH |= (1 << PH5); // OC4C
@@ -45,36 +46,42 @@ void setup_servo_motor(){
   TCCR4A |= (1 << COM4C1);
 }
 
-int setServoPosition(int angle){
+int setServoPosition(int angle){ 
+  // 모터 입력값 설정
   int pulseWidth = 1500 + 10 * angle;
   int ocrValue = 40000 * pulseWidth / 20000 - 1 ;
   return ocrValue;
 }
 
-void activateBrake_1(){
+void activateBrake_1(){ 
+  //브레이크 작동 함수 1
   ocrValue = setServoPosition(40);
   OCR4A = ocrValue;
 }
 
-void activateBrake_2(){
+void activateBrake_2(){ 
+  //브레이크 작동 함수 2
   ocrValue = setServoPosition(-40);
   OCR4B = ocrValue;
 }
 
-void return_brake(){
+void return_brake(){ 
+  //브레이크 모터 원위치 함수
   ocrValue = setServoPosition(0);
   OCR4A = ocrValue;
   OCR4B = ocrValue;
 }
 
-void balancing(int16_t angle){
+void balancing(int16_t angle){ 
+  //밸런싱 모터 작동 함수
   balancing_value = setServoPosition(angle * -1);
   OCR4C = balancing_value;
 }
 
-void setup() {
-  Serial.begin(9600); // 디버깅 목적의 시리얼 통신 시작
-  setup_servo_motor();
+void setup() { 
+  // 시리얼 통신 시작
+  Serial.begin(9600); 
+  setup_servo_motor(); 
   init_ADC();
 }
 
@@ -86,10 +93,11 @@ void loop() {
   else {
     return_brake();
   }
-  delay(30); // 0.1초 대기
+  delay(30);
 }
 
-void brakingSystem(int16_t slopeValue) {
+void brakingSystem(int16_t slopeValue) { 
+  //브레이크 작동
   activateBrake_1();
   activateBrake_2();
 }
