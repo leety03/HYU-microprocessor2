@@ -9,13 +9,11 @@ void brakingSystem(int16_t slopeValue) {
         if (!brakeFlag) {
             activateBrake_1();
             activateBrake_2();
-            brakeFlag = true;
         }
     } else if (slopeValue < LOWER_THRESHOLD - Adjusment) {
         if (!brakeFlag) {
             activateBrake_1();
             activateBrake_2();
-            brakeFlag = true; 
         }
     } else if (slopeValue < UPPER_THRESHOLD - Adjusment || slopeValue > LOWER_THRESHOLD + Adjusment) {
         if (brakeFlag) {
